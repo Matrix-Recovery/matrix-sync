@@ -4,8 +4,8 @@
 # - Syncs the relevant twrp minimal manifest, and patches it for building OrangeFox
 # - Pulls in the OrangeFox recovery sources and vendor tree
 # - Author:  DarthJabba9
-# - Version: generic:020
-# - Date:    02 July 2025
+# - Version: generic:021
+# - Date:    04 November 2025
 #
 # 	* Changes for v007 (20220430)  - make it clear that fox_12.1 is not ready
 # 	* Changes for v008 (20220708)  - fox_12.1 is now ready
@@ -20,12 +20,13 @@
 # 	* Changes for v017 (20250224)  - add fox_14.1 branch (this branch is *EXPERIMENTAL*)
 # 	* Changes for v018 (20250321)  - Enter R11.2; the 11.0 manifest is no longer supported
 # 	* Changes for v019 (20250514)  - Enter R11.3; add retry on 'git clone' failures
-# 	* Changes for v020 (20250702)  - patch system/vold/ for aidl weaver support
+# 	* Changes for v020 (20250702)  - patch system/vold/ for aidl weaver support (fox_14.1)
+# 	* Changes for v021 (20251104)  - patch .repo/manifests/remove-minimal.xml (fox_14.1); patch update_engine (fox_12.1)
 #
 # ***************************************************************************************
 
 # the version number of this script
-SCRIPT_VERSION="20250702";
+SCRIPT_VERSION="20251104";
 
 # the base version of the current OrangeFox
 FOX_BASE_VERSION="R11.3";
@@ -164,9 +165,11 @@ update_environment() {
   # by default, don't use SSH for the "git clone" commands; to use SSH, you can also export USE_SSH=1 before starting
   [ -z "$USE_SSH" ] && USE_SSH="0";
 
-  # the "diff" file that will be used to patch the original manifest
+  # the "diff" file(s) that will be used to patch the original manifest
   PATCH_FILE="$BASE_DIR/patches/patch-manifest-$FOX_DEF_BRANCH.diff";
   PATCH_VOLD="$BASE_DIR/patches/patch-vold-$FOX_DEF_BRANCH.diff";
+  PATCH_REMOVE_MINIMAL="$BASE_DIR/patches/patch-remove-minimal-$FOX_DEF_BRANCH.diff";
+  PATCH_UPDATE_ENGINE="$BASE_DIR/patches/patch-update-engine-$FOX_DEF_BRANCH.diff";
 
   # the directory in which the patch of the manifest will be executed
   MANIFEST_BUILD_DIR="$MANIFEST_DIR/build";
@@ -174,6 +177,8 @@ update_environment() {
   # other possibly relevant patch directories
   MANIFEST_SYSTEM_DIR="$MANIFEST_DIR/system";
   MANIFEST_VOLD_DIR="$MANIFEST_SYSTEM_DIR/vold";
+  MANIFEST_UPDATE_ENGINE_DIR="$MANIFEST_SYSTEM_DIR/update_engine";
+  MANIFEST_REPO_MANIFESTS_DIR="$MANIFEST_DIR/.repo/manifests";
 }
 
 # init the script, ensure we have the patch file, and create the manifest directory
@@ -213,16 +218,26 @@ patch_minimal_manifest() {
    patch -p1 < $PATCH_FILE;
    [ "$?" = "0" ] && echo "-- The $TWRP_BRANCH minimal manifest has been patched successfully" || abort "-- Failed to patch the $TWRP_BRANCH minimal manifest! Quitting.";
 
-   # --- 14.1 branch only ---
+   # --- 14.1 branch
    if [ "$BASE_VER" = "14" -o "$FOX_BRANCH" = "fox_14.1" ]; then
       echo "-- Patching the $TWRP_BRANCH system/vold for building OrangeFox for native $DEVICE_BRANCH devices ...";
       cd $MANIFEST_VOLD_DIR;
       patch -p1 < $PATCH_VOLD;
       [ "$?" = "0" ] && echo "-- The $TWRP_BRANCH system/vold has been patched successfully" || echo "-- Error! Failed to patch the $TWRP_BRANCH system/vold !";
+
+      echo "-- Patching the $TWRP_BRANCH .repo/manifests for building OrangeFox for native $DEVICE_BRANCH devices ...";
+      cd $MANIFEST_REPO_MANIFESTS_DIR;
+      patch -p1 < $PATCH_REMOVE_MINIMAL;
+      [ "$?" = "0" ] && echo "-- The $TWRP_BRANCH .repo/manifests has been patched successfully" || echo "-- Error! Failed to patch the $TWRP_BRANCH .repo/manifests !";
+   else
+      echo "-- Patching the $TWRP_BRANCH system/update_engine for building OrangeFox for native $DEVICE_BRANCH devices ...";
+      cd $MANIFEST_UPDATE_ENGINE_DIR;
+      patch -p1 < $PATCH_UPDATE_ENGINE;
+      [ "$?" = "0" ] && echo "-- The $TWRP_BRANCH system/update_engine has been patched successfully" || echo "-- Error! Failed to patch the $TWRP_BRANCH system/update_engine !";
    fi
-   # 14.1 branch only
 
    # save location of manifest dir
+   cd $MANIFEST_DIR/;
    echo "#" &> $SYNC_LOG;
    echo "MANIFEST_DIR=$MANIFEST_DIR" >> $SYNC_LOG;
    echo "#" >> $SYNC_LOG;
