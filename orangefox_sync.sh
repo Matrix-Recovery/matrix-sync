@@ -23,11 +23,12 @@
 # 	* Changes for v020 (20250702)  - patch system/vold/ for aidl weaver support (fox_14.1)
 # 	* Changes for v021 (20251104)  - patch .repo/manifests/remove-minimal.xml (fox_14.1); patch update_engine (fox_12.1)
 # 	* Changes for v022 (20251106)  - add se_omapi to fox_14.1 branch (*EXPERIMENTAL*)
+# 	* Changes for v023 (20251109)  - patch .repo/manifests/remove-minimal.xml (fox_14.1) to restore gflags (needed for snapuserd)
 #
 # ***************************************************************************************
 
 # the version number of this script
-SCRIPT_VERSION="20251106";
+SCRIPT_VERSION="20251109";
 
 # the base version of the current OrangeFox
 FOX_BASE_VERSION="R11.3";
