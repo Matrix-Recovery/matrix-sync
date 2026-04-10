@@ -4,8 +4,8 @@
 # - Syncs the relevant twrp minimal manifest, and patches it for building OrangeFox
 # - Pulls in the OrangeFox recovery sources and vendor tree
 # - Author:  DarthJabba9
-# - Version: generic:023
-# - Date:    09 November 2025
+# - Version: generic:024
+# - Date:    10 April 2026
 #
 # 	* Changes for v007 (20220430)  - make it clear that fox_12.1 is not ready
 # 	* Changes for v008 (20220708)  - fox_12.1 is now ready
@@ -24,11 +24,12 @@
 # 	* Changes for v021 (20251104)  - patch .repo/manifests/remove-minimal.xml (fox_14.1); patch update_engine (fox_12.1)
 # 	* Changes for v022 (20251106)  - add se_omapi to fox_14.1 branch (*EXPERIMENTAL*)
 # 	* Changes for v023 (20251109)  - patch .repo/manifests/remove-minimal.xml (fox_14.1) to restore gflags (needed for snapuserd)
+# 	* Changes for v024 (20260410)  - fix qcom-common branch issues
 #
 # ***************************************************************************************
 
 # the version number of this script
-SCRIPT_VERSION="20251109";
+SCRIPT_VERSION="20260410";
 
 # the base version of the current OrangeFox
 FOX_BASE_VERSION="R11.3";
@@ -50,6 +51,7 @@ do_fox_141() {
 	FOX_DEF_BRANCH="fox_14.1";
 	TWRP_BRANCH="twrp-14";
 	DEVICE_BRANCH="android-14";
+	TW_DEVICE_BRANCH="android-14.1";
 	test_build_device="vayu"; # the device whose tree we can clone for compiling a test build
 	[ -z "$MANIFEST_DIR" ] && MANIFEST_DIR="$BASE_DIR/$FOX_DEF_BRANCH";
 }
@@ -60,6 +62,7 @@ do_fox_121() {
 	FOX_DEF_BRANCH="fox_12.1";
 	TWRP_BRANCH="twrp-12.1";
 	DEVICE_BRANCH="android-12.1";
+	TW_DEVICE_BRANCH="android-12.1";
 	test_build_device="miatoll"; # the device whose tree we can clone for compiling a test build
 	[ -z "$MANIFEST_DIR" ] && MANIFEST_DIR="$BASE_DIR/$FOX_DEF_BRANCH";
 }
@@ -251,7 +254,7 @@ clone_common() {
 
    if [ ! -d "device/qcom/common" ]; then
    	echo "-- Cloning qcom common ...";
-	git clone https://github.com/TeamWin/android_device_qcom_common -b $DEVICE_BRANCH device/qcom/common;
+	git clone https://github.com/TeamWin/android_device_qcom_common -b $TW_DEVICE_BRANCH device/qcom/common;
 	[ "$?" = "0" ] && echo "-- Qcom common has been cloned successfully" || echo "-- Failed to clone Qcom common! You will need to clone it manually.";
    fi
 
