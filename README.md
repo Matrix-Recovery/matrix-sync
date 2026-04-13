@@ -17,7 +17,7 @@ Notes:
 - If you want to use ssh for cloning the OrangeFox sources and vendor tree, export "USE_SSH=1" before starting, or supply "--ssh 1" on the command line
 - After the initial sync process, you must then clone your device trees, before you can build for your device
 
-## These manifest branches are supported by the orangefox_sync.sh script: ##
+## These manifest branches are supported by the matrix_sync.sh script: ##
 ----------------------------------
 	14.1
 	12.1
