@@ -1,5 +1,7 @@
 # Sync a twrp minimal manifest, patch it for building Matrix Recovery, and sync the Matrix Recovery sources
 
+[![Check Upstream Updates](https://github.com/Matrix-Recovery/matrix-sync/actions/workflows/check-upstream.yml/badge.svg)](https://github.com/Matrix-Recovery/matrix-sync/actions/workflows/check-upstream.yml)
+
 ## To fetch the manifest for the first time, follow these steps: ##
 ------------------------------------
 
