@@ -1,0 +1,88 @@
+name: Check Upstream Updates
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # runs daily at 06:00 UTC
+  workflow_dispatch:     # allow manual trigger
+
+jobs:
+  check-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Matrix sync repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # need full history
+
+      - name: Add OrangeFox upstream remote
+        run: |
+          git remote add upstream https://gitlab.com/OrangeFox/sync.git || true
+          git fetch upstream master --no-tags
+
+      - name: Read last known upstream SHA
+        id: known
+        run: |
+          if [ -f .upstream-sha ]; then
+            echo "sha=$(cat .upstream-sha)" >> $GITHUB_OUTPUT
+          else
+            echo "sha=none" >> $GITHUB_OUTPUT
+            echo "::warning::No .upstream-sha file found. Run the update job once to initialise it."
+          fi
+
+      - name: Get current upstream HEAD SHA
+        id: current
+        run: |
+          SHA=$(git rev-parse upstream/master)
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          echo "Upstream HEAD: $SHA"
+
+      - name: Compare SHAs
+        id: compare
+        run: |
+          KNOWN="${{ steps.known.outputs.sha }}"
+          CURRENT="${{ steps.current.outputs.sha }}"
+          echo "Last known : $KNOWN"
+          echo "Upstream   : $CURRENT"
+
+          if [ "$KNOWN" = "$CURRENT" ]; then
+            echo "status=up-to-date" >> $GITHUB_OUTPUT
+          else
+            echo "status=behind" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Show what changed upstream (if behind)
+        if: steps.compare.outputs.status == 'behind'
+        run: |
+          KNOWN="${{ steps.known.outputs.sha }}"
+          CURRENT="${{ steps.current.outputs.sha }}"
+
+          echo "## New upstream commits in OrangeFox/sync:" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$KNOWN" = "none" ]; then
+            echo "_(no baseline SHA on record — showing last 10 upstream commits)_" >> $GITHUB_STEP_SUMMARY
+            git log upstream/master --oneline -10 >> $GITHUB_STEP_SUMMARY
+          else
+            git log ${KNOWN}..upstream/master --oneline >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## Files changed upstream:" >> $GITHUB_STEP_SUMMARY
+            git diff --name-only ${KNOWN} upstream/master >> $GITHUB_STEP_SUMMARY
+          fi
+
+          cat $GITHUB_STEP_SUMMARY
+
+      - name: PASS - already up to date
+        if: steps.compare.outputs.status == 'up-to-date'
+        run: |
+          echo "✅ Matrix sync is up to date with upstream OrangeFox/sync."
+          echo "Upstream SHA: ${{ steps.current.outputs.sha }}"
+
+      - name: FAIL - upstream has new commits
+        if: steps.compare.outputs.status == 'behind'
+        run: |
+          echo "❌ Upstream OrangeFox/sync has new commits!"
+          echo "Last known SHA : ${{ steps.known.outputs.sha }}"
+          echo "Upstream HEAD  : ${{ steps.current.outputs.sha }}"
+          echo ""
+          echo "Review the changes above and update .upstream-sha once you have"
+          echo "reviewed and merged/adapted what you need into Matrix sync."
+          exit 1
