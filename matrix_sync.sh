@@ -252,8 +252,7 @@ clone_common() {
 clone_se_omapi() {
 local dest="external/se_omapi";
 local URL="";
-   # TODO: Fork https://gitlab.com/OrangeFox/external/se_omapi to Matrix-Recovery org
-   # and update this URL to https://github.com/Matrix-Recovery/se_omapi.git
+
    if [ "$USE_SSH" = "0" ]; then
       URL="https://gitlab.com/OrangeFox/external/se_omapi.git";
    else

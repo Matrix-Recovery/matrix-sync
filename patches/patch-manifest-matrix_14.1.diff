@@ -234,7 +234,7 @@ diff --git a/make/envsetup.sh b/make/envsetup.sh
 +    export MATRIX_MANIFEST_ROOT=$(gettop)
 +
 +    if [ -z "$NOT_MATRIX" ]; then
-+       if [ ! -f $MATRIX_MANIFEST_ROOT/bootable/recovery/matrix_defaults.go -a ! -f $MATRIX_MANIFEST_ROOT/bootable/recovery/matrix.mk ]; then
++       if [ ! -f $MATRIX_MANIFEST_ROOT/bootable/recovery/orangefox_defaults.go -a ! -f $MATRIX_MANIFEST_ROOT/bootable/recovery/orangefox.mk ]; then
 +         export NOT_MATRIX=1
 +       fi
 +    fi
