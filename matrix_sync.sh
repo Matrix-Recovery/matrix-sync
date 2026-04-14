@@ -100,7 +100,13 @@ Process_CMD_Line() {
              # path
                 -p | -P | --path)
                         shift;
-                        [ -n "$1" ] && MANIFEST_DIR=$1;
+                        if [ -n "$1" ]; then
+                           if [[ "$1" == /* ]]; then
+                              MANIFEST_DIR="$1"
+                           else
+                              MANIFEST_DIR="$BASE_DIR/${1#./}"
+                           fi
+                        fi
                 ;;
              # branch
                 -b | -B | --branch)
@@ -160,7 +166,7 @@ update_environment() {
   PATCH_UPDATE_ENGINE="$BASE_DIR/patches/patch-update-engine-$MATRIX_DEF_BRANCH.diff";
 
   # the directory in which the patch of the manifest will be executed
-  MANIFEST_BUILD_DIR="$MANIFEST_DIR/build";
+  MANIFEST_BUILD_DIR="$MANIFEST_DIR/build/make";
 
   # other possibly relevant patch directories
   MANIFEST_SYSTEM_DIR="$MANIFEST_DIR/system";
